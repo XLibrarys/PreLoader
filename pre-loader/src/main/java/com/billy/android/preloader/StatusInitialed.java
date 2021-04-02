@@ -1,9 +1,8 @@
 package com.billy.android.preloader;
 
-
 /**
- * initial state
- * @author billy.qi
+ * 初始化状态
+ * startLoad：开始预加载，状态更新为StateLoading
  */
 class StatusInitialed extends StateBase {
 

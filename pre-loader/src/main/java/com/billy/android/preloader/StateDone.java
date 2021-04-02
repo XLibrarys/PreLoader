@@ -1,11 +1,10 @@
 package com.billy.android.preloader;
 
-
 import com.billy.android.preloader.interfaces.DataListener;
 
 /**
- * pre-load finished
- * Preloader.refresh() and PreLoader.listen(DataListener listener) are valid
+ * StateDone：预加载完成，并且已经向数据观察者发送数据
+ *
  */
 class StateDone extends StateBase {
     StateDone(Worker<?> worker) {

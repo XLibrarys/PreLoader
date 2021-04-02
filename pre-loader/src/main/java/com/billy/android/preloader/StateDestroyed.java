@@ -1,7 +1,7 @@
 package com.billy.android.preloader;
 
 /**
- * @author billy.qi
+ * 任务销毁状态
  */
 class StateDestroyed extends StateBase {
     StateDestroyed(Worker<?> worker) {

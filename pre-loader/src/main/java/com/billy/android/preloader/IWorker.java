@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 
 /**
  * interface for pre-load worker
+ *
  * @author billy.qi
  * @since 18/1/23 14:33
  */
@@ -13,6 +14,7 @@ interface IWorker {
 
     /**
      * set thread-pool executor for current worker
+     *
      * @param threadPoolExecutor thread-pool executor
      */
     void setThreadPoolExecutor(ExecutorService threadPoolExecutor);
@@ -28,8 +30,7 @@ interface IWorker {
     boolean refresh();
 
     /**
-     * start to listen data with {@link DataListener}
-     * @param dataListener {@link DataListener}
+     * 使用监听者开始监听数据
      */
     boolean listenData(DataListener dataListener);
 
@@ -41,6 +42,7 @@ interface IWorker {
 
     /**
      * remove {@link DataListener} for worker
+     *
      * @param listener {@link DataListener}
      */
     boolean removeListener(DataListener listener);

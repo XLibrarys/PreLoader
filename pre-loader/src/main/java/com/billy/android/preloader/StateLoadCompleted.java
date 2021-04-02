@@ -4,8 +4,8 @@ package com.billy.android.preloader;
 import com.billy.android.preloader.interfaces.DataListener;
 
 /**
- * data load finished, waiting for {@link DataListener}
- * @author billy.qi
+ * StateLoadCompleted：数据加载完毕，但此时并没有观察者，所有没有通知
+ * listenData：添加观察者，通知现有的观察者
  */
 class StateLoadCompleted extends StateBase {
     StateLoadCompleted(Worker<?> worker) {

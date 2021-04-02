@@ -4,58 +4,47 @@ package com.billy.android.preloader;
 import com.billy.android.preloader.interfaces.DataListener;
 
 /**
- * state of the pre-loader
- * @author billy.qi
+ * 预加载状态接口
  */
 interface State {
 
     /**
-     * start to load data
-     * @return
+     * 开始加载数据
      */
     boolean startLoad();
 
     /**
      * 销毁
-     * @return
      */
     boolean destroy();
 
     /**
-     * start to listen data
-     * @return
+     * 开始监听数据
      */
     boolean listenData();
 
     /**
-     * start to listen data with a listener
-     * @param listener listener of data
-     * @return true if success
+     * 使用指定监听者开始监听数据
      */
     boolean listenData(DataListener listener);
 
     /**
-     * remove listener
-     * @param listener listener of data
-     * @return true
+     * 移除监听者
      */
     boolean removeListener(DataListener listener);
 
     /**
-     * data load finished
-     * @return
+     * 数据加载完毕
      */
     boolean dataLoadFinished();
 
     /**
-     * re-load data for all {@link DataListener}
-     * @return success
+     * 对所有的数据监听者重新加载数据
      */
     boolean refresh();
 
     /**
-     * name of the state
-     * @return state name
+     * 状态名称
      */
     String name();
 }

@@ -19,8 +19,7 @@ import static com.billy.android.preloader.PreLoader.logger;
 
 
 /**
- * pre-load data <br>
- * @author billy.qi <a href="mailto:qiyilike@163.com">Contact me.</a>
+ * 预加载工作者
  */
 class Worker<T> implements Runnable, IWorker {
 
@@ -34,19 +33,25 @@ class Worker<T> implements Runnable, IWorker {
     };
 
     private static ExecutorService defaultThreadPoolExecutor = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
-                60L, TimeUnit.SECONDS,
-                new SynchronousQueue<Runnable>(), FACTORY);
+            60L, TimeUnit.SECONDS,
+            new SynchronousQueue<Runnable>(), FACTORY);
 
     private ExecutorService threadPoolExecutor;
 
+    //预加载数据
     private T loadedData;
+    //预加载观察者
     private final List<DataListener<T>> dataListeners = new CopyOnWriteArrayList<>();
+
     private final Handler mainThreadHandler = new Handler(Looper.getMainLooper());
+    //数据加载器
     DataLoader<T> dataLoader;
+    //状态者模式，Worker当前状态
     private volatile State state;
 
     Worker(DataLoader<T> loader, DataListener<T> listener) {
         init(loader);
+        //如果有数据观察者，添加观察者
         if (listener != null) {
             this.dataListeners.add(listener);
         }
@@ -60,6 +65,7 @@ class Worker<T> implements Runnable, IWorker {
     }
 
     private void init(DataLoader<T> loader) {
+        //设置数据加载器，设置为初始化状态
         this.dataLoader = loader;
         setState(new StatusInitialed(this));
     }
@@ -82,15 +88,21 @@ class Worker<T> implements Runnable, IWorker {
      */
     @Override
     public boolean preLoad() {
+        //执行当前状态-初始化状态开始加载
         return state.startLoad();
     }
 
+    /**
+     * 开始执行加载任务，使用线程池执行，设置为正在加载状态
+     */
     boolean doStartLoadWork() {
+        //如果自定义线程池，则自定义线程池，否则使用默认线程池执行
         if (threadPoolExecutor != null) {
             threadPoolExecutor.execute(this);
         } else {
             defaultThreadPoolExecutor.execute(this);
         }
+        //设置Wroker为正在执行状态
         setState(new StateLoading(this));
         return true;
     }
@@ -119,15 +131,25 @@ class Worker<T> implements Runnable, IWorker {
         return dataListeners.remove(listener);
     }
 
+    /**
+     * 完成数据加载工作，设置为加载工作完成
+     */
     boolean doDataLoadFinishWork() {
+        //设置加载状态为加载完毕
         setState(new StateLoadCompleted(this));
         return true;
     }
 
+    /**
+     * 向数据观察者发送数据
+     */
     boolean doSendLoadedDataToListenerWork() {
         return doSendLoadedDataToListenerWork(dataListeners);
     }
 
+    /**
+     * 添加任务数据观察者
+     */
     boolean doAddListenerWork(DataListener<T> listener) {
         if (listener != null) {
             if (!this.dataListeners.contains(listener)) {
@@ -138,7 +160,11 @@ class Worker<T> implements Runnable, IWorker {
         return false;
     }
 
+    /**
+     * 向观察者发送数据
+     */
     boolean doSendLoadedDataToListenerWork(DataListener<T> listener) {
+        //添加数据观察者
         doAddListenerWork(listener);
         List<DataListener<T>> listeners = null;
         if (listener != null) {
@@ -147,6 +173,7 @@ class Worker<T> implements Runnable, IWorker {
         }
         return doSendLoadedDataToListenerWork(listeners);
     }
+
     private boolean doSendLoadedDataToListenerWork(final List<DataListener<T>> listeners) {
         if (!(state instanceof StateDone)) {
             setState(new StateDone(this));
@@ -166,14 +193,20 @@ class Worker<T> implements Runnable, IWorker {
         return true;
     }
 
+    /**
+     * 监听器等待数据加载工作
+     * 添加数据观察者，设置为StateListening状态
+     */
     boolean doWaitForDataLoaderWork(DataListener<T> listener) {
         if (listener != null) {
             dataListeners.add(listener);
         }
         return doWaitForDataLoaderWork();
     }
+
     /**
      * waiting for {@link DataLoader#loadData()} finish
+     *
      * @return false if no {@link DataListener}, true otherwise
      */
     boolean doWaitForDataLoaderWork() {
@@ -204,12 +237,14 @@ class Worker<T> implements Runnable, IWorker {
     @Override
     public void run() {
         try {
+            //重置预加载数据，执行数据预加载
             loadedData = null;
             //load data (from network or local i/o)
             loadedData = dataLoader.loadData();
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.throwable(e);
         }
+
         state.dataLoadFinished();
     }
 
@@ -217,7 +252,7 @@ class Worker<T> implements Runnable, IWorker {
         for (DataListener<T> listener : listeners) {
             try {
                 listener.onDataArrived(t);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 logger.throwable(e);
             }
         }
@@ -231,9 +266,12 @@ class Worker<T> implements Runnable, IWorker {
         if (state != null) {
             if (this.state != null) {
                 if (this.state.getClass() == state.getClass()) {
+                    //如果状态相同则返回什么都不执行
                     return;
                 }
             }
+
+            //否则更新为最新的状态
             this.state = state;
             logger.info("set state to:" + state.name());
         }

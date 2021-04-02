@@ -4,14 +4,11 @@ import com.billy.android.preloader.interfaces.DataListener;
 
 import static com.billy.android.preloader.PreLoader.logger;
 
-
 /**
- * basic state
- *
- * @author billy.qi
+ * 状态基类
  */
 abstract class StateBase implements State {
-
+    //状态相关的worker
     protected Worker<?> worker;
 
     StateBase(Worker<?> worker) {

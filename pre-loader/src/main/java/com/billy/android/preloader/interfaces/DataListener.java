@@ -1,8 +1,7 @@
 package com.billy.android.preloader.interfaces;
 
 /**
- * listener for pre-load data
- * @author billy.qi
+ * 预加载数据监听
  */
 public interface DataListener<DATA> {
     /**

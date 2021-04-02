@@ -12,11 +12,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.billy.android.preloader.PreLoader.logger;
 
 /**
- * pool for pre-load Worker
- * @author billy.qi
+ * 预加载池
  */
 public class PreLoaderPool {
 
+    //内部类单例
     private static class Inner {
         static final PreLoaderPool INSTANCE = new PreLoaderPool();
     }
@@ -25,12 +25,13 @@ public class PreLoaderPool {
         return Inner.INSTANCE;
     }
 
+    //预计在Worker唯一ID，原子类操作避免多线程安全问题
     private final AtomicInteger idMaker = new AtomicInteger(0);
-
+    //预加载Worker集合
     private final ConcurrentHashMap<Integer, IWorker> workerMap = new ConcurrentHashMap<>();
 
     public <T> int preLoad(DataLoader<T> loader) {
-        Worker<T> worker = new Worker<>(loader, (DataListener<T>)null);
+        Worker<T> worker = new Worker<>(loader, (DataListener<T>) null);
         return preLoadWorker(worker);
     }
 
@@ -45,8 +46,11 @@ public class PreLoaderPool {
     }
 
     private <T> int preLoadWorker(Worker<T> worker) {
+        //将Worker生成唯一id，添加到Worker集合
         int id = idMaker.incrementAndGet();
         workerMap.put(id, worker);
+
+        //开始执行预加载
         worker.preLoad();
         return id;
     }
@@ -68,11 +72,15 @@ public class PreLoaderPool {
         return worker != null && worker.listenData();
     }
 
+    /**
+     * 观察指定id预加载任务的的数据
+     */
     public <T> boolean listenData(int id, DataListener<T> dataListener) {
         try {
+            //获取指定id的预加载任务
             IWorker worker = workerMap.get(id);
             return worker != null && worker.listenData(dataListener);
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.throwable(e);
         }
         return false;
@@ -86,7 +94,7 @@ public class PreLoaderPool {
                     worker.listenData(listener);
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.throwable(e);
         }
         return false;
@@ -96,7 +104,7 @@ public class PreLoaderPool {
         try {
             IWorker worker = workerMap.get(id);
             return worker != null && worker.removeListener(dataListener);
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.throwable(e);
         }
         return false;
@@ -117,7 +125,7 @@ public class PreLoaderPool {
             if (worker != null) {
                 try {
                     worker.destroy();
-                } catch(Exception e) {
+                } catch (Exception e) {
                     logger.throwable(e);
                 }
             }
